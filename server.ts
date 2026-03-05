@@ -74,43 +74,43 @@ app.post("/api/analyze", async (req, res) => {
 
     // 3. Construct Prompt for Gemini
     const prompt = `
-      You are an expert AI Engine Optimization (AEO) Strategist. Analyze the following web page content for its ability to be cited by Generative AI engines (Google Overview, ChatGPT, etc.).
+      Eres un experto Estratega de Optimización para Motores de IA (AEO). Analiza el contenido de la siguiente página web para determinar su capacidad de ser citada por motores de IA Generativa (Google Overview, ChatGPT, etc.).
       
       URL: ${url}
-      Title: ${title}
-      Meta Description: ${metaDescription}
-      H1 Tags: ${JSON.stringify(h1s)}
-      H2 Tags: ${JSON.stringify(h2s)}
-      Schema Markup Found: ${schemaScripts.length > 0 ? "Yes" : "No"} (Count: ${schemaScripts.length})
-      Content Sample: ${mainContent}
+      Título: ${title}
+      Meta Descripción: ${metaDescription}
+      Etiquetas H1: ${JSON.stringify(h1s)}
+      Etiquetas H2: ${JSON.stringify(h2s)}
+      Marcado Schema Encontrado: ${schemaScripts.length > 0 ? "Sí" : "No"} (Cantidad: ${schemaScripts.length})
+      Muestra de Contenido: ${mainContent}
 
-      Evaluate the page based on these 6 criteria:
-      1. Semantic Content & Quality (Depth, structure, clarity)
-      2. Structured Data (Schema implementation)
-      3. E-E-A-T (Expertise, Experience, Authoritativeness, Trustworthiness signals)
-      4. UX & Core Web Vitals (Estimate based on structure/complexity)
-      5. Search Intent & Topic Coverage
-      6. Metadata Optimization
+      Evalúa la página basándote en estos 6 criterios:
+      1. Contenido Semántico y Calidad (Profundidad, estructura, claridad)
+      2. Datos Estructurados (Implementación de Schema)
+      3. E-E-A-T (Señales de Experiencia, Conocimiento, Autoridad, Confianza)
+      4. UX y Core Web Vitals (Estimación basada en estructura/complejidad)
+      5. Intención de Búsqueda y Cobertura del Tema
+      6. Optimización de Metadatos
 
-      Provide a JSON response with the following structure:
+      Proporciona una respuesta JSON con la siguiente estructura (asegúrate de que todo el texto esté en español):
       {
-        "overallScore": number (0-100),
+        "overallScore": número (0-100),
         "criteriaScores": {
-          "content": number (0-100),
-          "structuredData": number (0-100),
-          "eeat": number (0-100),
-          "ux": number (0-100),
-          "intent": number (0-100),
-          "metadata": number (0-100)
+          "content": número (0-100),
+          "structuredData": número (0-100),
+          "eeat": número (0-100),
+          "ux": número (0-100),
+          "intent": número (0-100),
+          "metadata": número (0-100)
         },
-        "summary": "Executive summary for a CMO (max 3 sentences)",
+        "summary": "Resumen ejecutivo para un CMO (máximo 3 oraciones)",
         "recommendations": [
-          { "priority": "High", "impact": "High", "action": "Specific action", "reason": "Why this matters for AEO" },
-          { "priority": "Medium", "impact": "Medium", "action": "Specific action", "reason": "Why this matters for AEO" },
-          { "priority": "Low", "impact": "Low", "action": "Specific action", "reason": "Why this matters for AEO" }
+          { "priority": "Alta", "impact": "Alto", "action": "Acción específica", "reason": "Por qué esto importa para AEO" },
+          { "priority": "Media", "impact": "Medio", "action": "Acción específica", "reason": "Por qué esto importa para AEO" },
+          { "priority": "Baja", "impact": "Bajo", "action": "Acción específica", "reason": "Por qué esto importa para AEO" }
         ],
         "keywords": [
-          { "term": "Keyword/Phrase", "reason": "Why this triggers AI citation" }
+          { "term": "Palabra/Frase Clave", "reason": "Por qué esto activa la citación de IA" }
         ]
       }
     `;

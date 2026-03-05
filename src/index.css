@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @theme {
   --color-background: var(--background);
@@ -22,35 +23,36 @@
   --color-ring: var(--ring);
   --radius-radius: var(--radius);
   
-  /* Google Brand Colors */
-  --color-google-blue: #4285F4;
-  --color-google-red: #DB4437;
-  --color-google-yellow: #F4B400;
-  --color-google-green: #0F9D58;
+  /* R'Evolution Brand Colors */
+  --color-brand-navy: #0B162C;
+  --color-brand-green: #00D06C;
+  --color-brand-light: #F8FAFC;
+  
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Soft cool white */
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 217 91% 60%; /* Vibrant Blue */
+    --primary: 220 60% 11%; /* Brand Navy */
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 151 100% 41%; /* Brand Green */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 151 100% 41%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 217 91% 60%;
-    --radius: 1rem; /* More rounded for modern feel */
+    --ring: 220 60% 11%;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -62,8 +64,8 @@
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
     --primary-foreground: 222 47% 11%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 151 100% 41%;
+    --secondary-foreground: 0 0% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;
@@ -83,11 +85,9 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Vibrant Gradient Background */
-    background: radial-gradient(circle at 0% 0%, rgba(66, 133, 244, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 0%, rgba(219, 68, 55, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(244, 180, 0, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 0% 100%, rgba(15, 157, 88, 0.15) 0%, transparent 50%),
+    /* Brand Gradient Background - Subtle Navy and Green */
+    background: radial-gradient(circle at 0% 0%, rgba(11, 22, 44, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(0, 208, 108, 0.08) 0%, transparent 50%),
                 var(--color-background);
     background-attachment: fixed;
   }
@@ -95,56 +95,54 @@
 
 /* Glassmorphism Utilities */
 .glass {
-  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg;
+  @apply bg-white/80 backdrop-blur-xl border border-white/60 shadow-lg;
 }
 
 .glass-card {
-  @apply bg-white/60 backdrop-blur-md border border-white/50 shadow-sm hover:shadow-md transition-all duration-300;
+  @apply bg-white/70 backdrop-blur-md border border-white/60 shadow-sm hover:shadow-md transition-all duration-300;
 }
 
-/* Rainbow Border Hover Effect */
-.rainbow-border {
+/* Brand Border Hover Effect */
+.brand-border {
   position: relative;
   z-index: 0;
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.rainbow-border::before {
+.brand-border::before {
   content: "";
   position: absolute;
   z-index: -1;
   inset: -2px;
   background: linear-gradient(
     45deg,
-    #4285F4,
-    #DB4437,
-    #F4B400,
-    #0F9D58,
-    #4285F4
+    #0B162C,
+    #00D06C,
+    #0B162C
   );
-  background-size: 400%;
+  background-size: 200%;
   border-radius: inherit;
   opacity: 0;
   transition: opacity 0.3s ease;
-  animation: rainbow 20s linear infinite;
+  animation: shimmer 3s linear infinite;
 }
 
-.rainbow-border:hover::before {
+.brand-border:hover::before {
   opacity: 1;
 }
 
-.rainbow-border::after {
+.brand-border::after {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: 1px; /* Thickness of the border */
-  background: inherit; /* Matches the parent's background */
+  inset: 1px;
+  background: inherit;
   border-radius: inherit;
   background-clip: content-box;
 }
 
-@keyframes rainbow {
+@keyframes shimmer {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }

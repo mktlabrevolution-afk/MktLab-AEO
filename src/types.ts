@@ -10,8 +10,8 @@ export interface AnalysisResult {
   };
   summary: string;
   recommendations: Array<{
-    priority: "High" | "Medium" | "Low";
-    impact: "High" | "Medium" | "Low";
+    priority: "Alta" | "Media" | "Baja";
+    impact: "Alto" | "Medio" | "Bajo";
     action: string;
     reason: string;
   }>;

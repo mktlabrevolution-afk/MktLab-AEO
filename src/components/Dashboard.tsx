@@ -27,12 +27,12 @@ interface DashboardProps {
 
 export default function Dashboard({ result, url }: DashboardProps) {
   const criteriaData = [
-    { subject: "Content", A: result.criteriaScores.content, fullMark: 100 },
+    { subject: "Contenido", A: result.criteriaScores.content, fullMark: 100 },
     { subject: "Schema", A: result.criteriaScores.structuredData, fullMark: 100 },
     { subject: "E-E-A-T", A: result.criteriaScores.eeat, fullMark: 100 },
     { subject: "UX", A: result.criteriaScores.ux, fullMark: 100 },
-    { subject: "Intent", A: result.criteriaScores.intent, fullMark: 100 },
-    { subject: "Metadata", A: result.criteriaScores.metadata, fullMark: 100 },
+    { subject: "Intención", A: result.criteriaScores.intent, fullMark: 100 },
+    { subject: "Metadatos", A: result.criteriaScores.metadata, fullMark: 100 },
   ];
 
   const getScoreColor = (score: number) => {
@@ -52,19 +52,19 @@ export default function Dashboard({ result, url }: DashboardProps) {
     
     // Title
     doc.setFontSize(20);
-    doc.text("AEO Analysis Report", 14, 22);
+    doc.text("Reporte de Análisis AEO", 14, 22);
     
     doc.setFontSize(12);
     doc.text(`URL: ${url}`, 14, 32);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 38);
+    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 38);
 
     // Overall Score
     doc.setFontSize(16);
-    doc.text(`Overall AEO Score: ${result.overallScore}/100`, 14, 50);
+    doc.text(`Puntuación General AEO: ${result.overallScore}/100`, 14, 50);
 
     // Summary
     doc.setFontSize(14);
-    doc.text("Executive Summary", 14, 65);
+    doc.text("Resumen Ejecutivo", 14, 65);
     doc.setFontSize(10);
     const splitSummary = doc.splitTextToSize(result.summary, 180);
     doc.text(splitSummary, 14, 72);
@@ -72,21 +72,21 @@ export default function Dashboard({ result, url }: DashboardProps) {
     // Criteria Scores
     let yPos = 90;
     doc.setFontSize(14);
-    doc.text("Criteria Breakdown", 14, yPos);
+    doc.text("Desglose de Criterios", 14, yPos);
     yPos += 10;
     
     const criteriaRows = [
-      ["Semantic Content", result.criteriaScores.content],
-      ["Structured Data", result.criteriaScores.structuredData],
+      ["Contenido Semántico", result.criteriaScores.content],
+      ["Datos Estructurados", result.criteriaScores.structuredData],
       ["E-E-A-T", result.criteriaScores.eeat],
-      ["UX & Core Web Vitals", result.criteriaScores.ux],
-      ["Search Intent", result.criteriaScores.intent],
-      ["Metadata", result.criteriaScores.metadata],
+      ["UX y Core Web Vitals", result.criteriaScores.ux],
+      ["Intención de Búsqueda", result.criteriaScores.intent],
+      ["Metadatos", result.criteriaScores.metadata],
     ];
 
     autoTable(doc, {
       startY: yPos,
-      head: [["Criteria", "Score"]],
+      head: [["Criterio", "Puntuación"]],
       body: criteriaRows,
     });
 
@@ -94,13 +94,13 @@ export default function Dashboard({ result, url }: DashboardProps) {
     // @ts-ignore
     yPos = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(14);
-    doc.text("Prioritized Recommendations", 14, yPos);
+    doc.text("Recomendaciones Priorizadas", 14, yPos);
     yPos += 5;
 
     const recRows = result.recommendations.map(r => [r.priority, r.action, r.reason]);
     autoTable(doc, {
       startY: yPos,
-      head: [["Priority", "Action", "Reason"]],
+      head: [["Prioridad", "Acción", "Razón"]],
       body: recRows,
     });
 
@@ -108,17 +108,17 @@ export default function Dashboard({ result, url }: DashboardProps) {
     // @ts-ignore
     yPos = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(14);
-    doc.text("AI Activation Keywords", 14, yPos);
+    doc.text("Palabras Clave de Activación IA", 14, yPos);
     yPos += 5;
 
     const kwRows = result.keywords.map(k => [k.term, k.reason]);
     autoTable(doc, {
       startY: yPos,
-      head: [["Keyword", "AI Relevance"]],
+      head: [["Palabra Clave", "Relevancia IA"]],
       body: kwRows,
     });
 
-    doc.save("aeo-report.pdf");
+    doc.save("aeo-reporte.pdf");
   };
 
   return (
@@ -126,12 +126,12 @@ export default function Dashboard({ result, url }: DashboardProps) {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Analysis Results</h2>
-          <p className="text-muted-foreground text-sm font-mono mt-1">{url}</p>
+          <h2 className="text-2xl font-bold tracking-tight text-brand-navy">Resultados del Análisis</h2>
+          <p className="text-brand-navy/60 text-sm font-mono mt-1">{url}</p>
         </div>
-        <Button onClick={generatePDF} className="gap-2">
+        <Button onClick={generatePDF} className="gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white border-0 shadow-md">
           <Download className="w-4 h-4" />
-          Download Report
+          Descargar Reporte
         </Button>
       </div>
 
@@ -141,9 +141,9 @@ export default function Dashboard({ result, url }: DashboardProps) {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center rainbow-border"
+          className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Overall AEO Score</h3>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-2">Puntuación General AEO</h3>
           <div className="relative flex items-center justify-center">
             <svg className="w-32 h-32 transform -rotate-90">
               <circle
@@ -153,7 +153,7 @@ export default function Dashboard({ result, url }: DashboardProps) {
                 stroke="currentColor"
                 strokeWidth="8"
                 fill="transparent"
-                className="text-muted/20"
+                className="text-brand-navy/10"
               />
               <circle
                 cx="64"
@@ -178,10 +178,10 @@ export default function Dashboard({ result, url }: DashboardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="md:col-span-2 glass-card rounded-2xl p-6 flex flex-col justify-center rainbow-border"
+          className="md:col-span-2 glass-card rounded-2xl p-6 flex flex-col justify-center brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Executive Summary</h3>
-          <p className="text-lg leading-relaxed text-foreground/90">{result.summary}</p>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-3">Resumen Ejecutivo</h3>
+          <p className="text-lg leading-relaxed text-brand-navy/90">{result.summary}</p>
         </motion.div>
       </div>
 
@@ -191,24 +191,24 @@ export default function Dashboard({ result, url }: DashboardProps) {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-card rounded-2xl p-6 min-h-[400px] rainbow-border"
+          className="glass-card rounded-2xl p-6 min-h-[400px] brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">Performance Radar</h3>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-6">Radar de Rendimiento</h3>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={criteriaData}>
-              <PolarGrid stroke="currentColor" className="text-muted/20" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: 'currentColor', fontSize: 12 }} className="text-muted-foreground" />
+              <PolarGrid stroke="#0B162C" strokeOpacity={0.1} />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: '#0B162C', fontSize: 12, opacity: 0.7 }} />
               <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
               <Radar
-                name="Score"
+                name="Puntuación"
                 dataKey="A"
-                stroke="#4285F4"
-                fill="#4285F4"
-                fillOpacity={0.4}
+                stroke="#0B162C"
+                fill="#0B162C"
+                fillOpacity={0.2}
               />
               <Tooltip 
-                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(8px)', borderColor: 'rgba(255,255,255,0.5)', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                itemStyle={{ color: 'var(--foreground)' }}
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)', borderColor: 'rgba(11, 22, 44, 0.1)', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', color: '#0B162C' }}
+                itemStyle={{ color: '#0B162C' }}
               />
             </RadarChart>
           </ResponsiveContainer>
@@ -218,14 +218,14 @@ export default function Dashboard({ result, url }: DashboardProps) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass-card rounded-2xl p-6 rainbow-border"
+          className="glass-card rounded-2xl p-6 brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">Criteria Breakdown</h3>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-6">Desglose de Criterios</h3>
           <div className="space-y-4">
             {criteriaData.map((item, index) => (
               <div key={item.subject} className="flex items-center gap-4">
-                <span className="w-32 text-sm font-medium">{item.subject}</span>
-                <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+                <span className="w-32 text-sm font-medium text-brand-navy">{item.subject}</span>
+                <div className="flex-1 h-2 bg-brand-navy/5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${item.A}%` }}
@@ -246,34 +246,34 @@ export default function Dashboard({ result, url }: DashboardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-2 glass-card rounded-2xl p-6 rainbow-border"
+          className="lg:col-span-2 glass-card rounded-2xl p-6 brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">Prioritized Recommendations</h3>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-6">Recomendaciones Priorizadas</h3>
           <div className="space-y-4">
             {result.recommendations.map((rec, i) => (
               <div key={i} className="flex gap-4 p-4 rounded-xl bg-white/40 border border-white/40 hover:bg-white/60 transition-colors">
                 <div className="mt-1">
-                  {rec.priority === "High" ? (
-                    <AlertTriangle className="w-5 h-5 text-google-red" />
-                  ) : rec.priority === "Medium" ? (
-                    <Info className="w-5 h-5 text-google-yellow" />
+                  {rec.priority === "Alta" ? (
+                    <AlertTriangle className="w-5 h-5 text-rose-500" />
+                  ) : rec.priority === "Media" ? (
+                    <Info className="w-5 h-5 text-amber-500" />
                   ) : (
-                    <CheckCircle className="w-5 h-5 text-google-green" />
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase ${
-                      rec.priority === "High" ? "bg-red-100 text-red-700" :
-                      rec.priority === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                      "bg-green-100 text-green-700"
+                      rec.priority === "Alta" ? "bg-rose-100 text-rose-700" :
+                      rec.priority === "Media" ? "bg-amber-100 text-amber-700" :
+                      "bg-emerald-100 text-emerald-700"
                     }`}>
-                      {rec.priority} Priority
+                      Prioridad {rec.priority}
                     </span>
-                    <span className="text-xs text-muted-foreground">Impact: {rec.impact}</span>
+                    <span className="text-xs text-brand-navy/60">Impacto: {rec.impact}</span>
                   </div>
-                  <h4 className="font-semibold text-sm mb-1">{rec.action}</h4>
-                  <p className="text-sm text-muted-foreground">{rec.reason}</p>
+                  <h4 className="font-semibold text-sm mb-1 text-brand-navy">{rec.action}</h4>
+                  <p className="text-sm text-brand-navy/70">{rec.reason}</p>
                 </div>
               </div>
             ))}
@@ -284,17 +284,17 @@ export default function Dashboard({ result, url }: DashboardProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="glass-card rounded-2xl p-6 rainbow-border"
+          className="glass-card rounded-2xl p-6 brand-border"
         >
-          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">AI Activation Keywords</h3>
+          <h3 className="text-sm font-medium text-brand-navy/60 uppercase tracking-wider mb-6">Palabras Clave de Activación IA</h3>
           <div className="flex flex-wrap gap-2">
             {result.keywords.map((kw, i) => (
               <div key={i} className="group relative">
-                <span className="inline-block px-3 py-1.5 bg-white/50 text-google-blue rounded-full text-sm font-medium cursor-help border border-google-blue/20 hover:bg-google-blue hover:text-white transition-all shadow-sm">
+                <span className="inline-block px-3 py-1.5 bg-brand-navy/5 text-brand-navy rounded-full text-sm font-medium cursor-help border border-brand-navy/10 hover:bg-brand-navy hover:text-white transition-all shadow-sm">
                   {kw.term}
                 </span>
                 {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-white/90 backdrop-blur-md text-foreground text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-white/50">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-white/90 backdrop-blur-md text-brand-navy text-xs rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 border border-white/50">
                   {kw.reason}
                 </div>
               </div>
