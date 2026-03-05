@@ -3,13 +3,45 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+// Simple in-memory rate limiter definition
+// Maps IP to an array of request timestamps.
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 3;
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log(`[API] Received ${req.method} request to /api/analyze`);
 
-    // Handle initial POST requests
+    // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
+
+    // --- Rate Limiting Logic ---
+    // Extract IP from Vercel's proxy headers or fallback to an empty string
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    // Get request history for this IP
+    let requestHistory = rateLimitMap.get(ip) || [];
+
+    // Filter out timestamps older than the window
+    requestHistory = requestHistory.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW_MS);
+
+    // Check if the limit is exceeded
+    if (requestHistory.length >= MAX_REQUESTS_PER_WINDOW) {
+        console.warn(`[API] Rate limit exceeded for IP: ${ip}`);
+        return res.status(429).json({
+            error: "Too Many Requests",
+            message: "Has excedido el límite de 3 análisis por minuto. Por favor, espera unos segundos e intenta de nuevo."
+        });
+    }
+
+    // Add current request timestamp and save back to map
+    requestHistory.push(now);
+    rateLimitMap.set(ip, requestHistory);
+    console.log(`[API] Request allowed for IP: ${ip}. Remaining quota: ${MAX_REQUESTS_PER_WINDOW - requestHistory.length}`);
+    // --- End Rate Limiting Logic ---
 
     try {
         const { url, apiKey } = req.body;
@@ -44,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             timeout: 10000,
         });
-        
+
         console.log(`[API] HTML fetched successfully. Status: ${response.status}`);
         const html = response.data;
 
@@ -130,16 +162,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     } catch (error: any) {
         console.error("[API] Critical Analysis error:", error);
-        
+
         // Special case for Axios errors (like site blocking scraping)
         if (error.isAxiosError) {
-          return res.status(500).json({
-              error: "Failed to fetch URL content",
-              details: error.message,
-              status: error.response?.status
-          });
+            return res.status(500).json({
+                error: "Failed to fetch URL content",
+                details: error.message,
+                status: error.response?.status
+            });
         }
-        
+
         res.status(500).json({
             error: "Failed to analyze URL",
             details: error.message || String(error)

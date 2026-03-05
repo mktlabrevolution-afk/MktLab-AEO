@@ -31,13 +31,17 @@ export default function App() {
     setResult(null);
 
     try {
-      const response = await axios.post("/api/analyze", { 
+      const response = await axios.post("/api/analyze", {
         url,
         apiKey: savedApiKey // Send the saved API key
       });
       setResult(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to analyze URL. Please check the URL and try again.");
+      if (err.response?.status === 429) {
+        setError(err.response.data.message || "Has excedido el límite de análisis. Por favor, espera un minuto.");
+      } else {
+        setError(err.response?.data?.error || "Failed to analyze URL. Please check the URL and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -55,9 +59,9 @@ export default function App() {
             <span className="text-xs font-medium text-brand-navy/70 tracking-wide uppercase">Education Group</span>
           </div>
           <div className="flex items-center gap-4">
-             <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="gap-2 text-brand-navy/70 hover:text-brand-navy hover:bg-brand-navy/5 transition-all rounded-full"
               onClick={() => setShowApiKeyInput(!showApiKeyInput)}
             >
@@ -71,7 +75,7 @@ export default function App() {
             </nav>
           </div>
         </div>
-        
+
         {/* API Key Input Panel */}
         <AnimatePresence>
           {showApiKeyInput && (
@@ -84,9 +88,9 @@ export default function App() {
               <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row gap-4 items-center justify-center">
                 <div className="flex-1 max-w-md w-full relative">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/50" />
-                  <Input 
-                    type="password" 
-                    placeholder="Ingresa tu Gemini API Key" 
+                  <Input
+                    type="password"
+                    placeholder="Ingresa tu Gemini API Key"
                     className="pl-9 bg-white border-brand-navy/10 focus:border-brand-navy/30 focus:ring-brand-navy/10 text-brand-navy"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
