@@ -4,14 +4,19 @@ import * as cheerio from "cheerio";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // Only allow POST requests
+    console.log(`[API] Received ${req.method} request to /api/analyze`);
+
+    // Handle initial POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
     try {
         const { url, apiKey } = req.body;
+        console.log(`[API] Payload received. URL: ${url ? url : 'MISSING'}. User provided key: ${apiKey ? 'YES' : 'NO'}`);
+
         if (!url) {
+            console.log(`[API] Rejecting request: URL is required`);
             return res.status(400).json({ error: "URL is required" });
         }
 
@@ -19,15 +24,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const effectiveApiKey = apiKey || process.env.GEMINI_API_KEY || process.env.API_KEY;
 
         if (!effectiveApiKey || effectiveApiKey === "MY_GEMINI_API_KEY") {
+            console.log(`[API] Rejecting request: Valid API key not found in env or payload.`);
             return res.status(400).json({
                 error: "API Key is missing or invalid. Please provide a valid Gemini API Key in the settings or environment variables."
             });
         }
 
         // Initialize Gemini API with the effective key
+        console.log(`[API] Initializing Gemini API...`);
         const client = new GoogleGenAI({ apiKey: effectiveApiKey });
 
-        console.log(`Analyzing URL: ${url}`);
+        console.log(`[API] Pre-flight fetch for URL: ${url}`);
 
         // 1. Fetch HTML content
         const response = await axios.get(url, {
@@ -37,9 +44,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
             timeout: 10000,
         });
+        
+        console.log(`[API] HTML fetched successfully. Status: ${response.status}`);
         const html = response.data;
 
         // 2. Parse HTML with Cheerio
+        console.log(`[API] Parsing HTML with cheerio...`);
         const $ = cheerio.load(html);
         const title = $("title").text();
         const metaDescription = $('meta[name="description"]').attr("content") || "";
@@ -61,6 +71,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .get();
 
         // 3. Construct Prompt for Gemini
+        console.log(`[API] Constructing prompt for Gemini...`);
         const prompt = `
       Eres un experto Estratega de Optimización para Motores de IA (AEO). Analiza el contenido de la siguiente página web para determinar su capacidad de ser citada por motores de IA Generativa (Google Overview, ChatGPT, etc.).
       
@@ -104,6 +115,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     `;
 
         // 4. Call Gemini API
+        console.log(`[API] Calling Gemini API...`);
         const result = await client.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -112,14 +124,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
         });
 
+        console.log(`[API] Gemini API response received.`);
         const analysis = JSON.parse(result.text || "{}");
-        res.status(200).json(analysis);
+        return res.status(200).json(analysis);
 
     } catch (error: any) {
-        console.error("Analysis error:", error);
+        console.error("[API] Critical Analysis error:", error);
+        
+        // Special case for Axios errors (like site blocking scraping)
+        if (error.isAxiosError) {
+          return res.status(500).json({
+              error: "Failed to fetch URL content",
+              details: error.message,
+              status: error.response?.status
+          });
+        }
+        
         res.status(500).json({
             error: "Failed to analyze URL",
-            details: error.message
+            details: error.message || String(error)
         });
     }
 }
