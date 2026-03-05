@@ -50,29 +50,84 @@ export default function Dashboard({ result, url }: DashboardProps) {
   const generatePDF = () => {
     const doc = new jsPDF();
     
-    // Title
-    doc.setFontSize(20);
-    doc.text("Reporte de Análisis AEO", 14, 22);
+    // Brand Colors
+    const brandNavy = "#0B162C";
+    const brandGreen = "#00D06C";
+    const brandLight = "#F8FAFC";
+
+    // --- Header ---
+    // Background for header
+    doc.setFillColor(brandNavy);
+    doc.rect(0, 0, 210, 40, "F");
+
+    // Logo Text: R'Evolution
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text("R'Evolution", 14, 20);
     
-    doc.setFontSize(12);
-    doc.text(`URL: ${url}`, 14, 32);
-    doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 38);
-
-    // Overall Score
-    doc.setFontSize(16);
-    doc.text(`Puntuación General AEO: ${result.overallScore}/100`, 14, 50);
-
-    // Summary
-    doc.setFontSize(14);
-    doc.text("Resumen Ejecutivo", 14, 65);
+    // Subtitle: Education Group
     doc.setFontSize(10);
-    const splitSummary = doc.splitTextToSize(result.summary, 180);
-    doc.text(splitSummary, 14, 72);
+    doc.setFont("helvetica", "normal");
+    doc.text("EDUCATION GROUP", 14, 26);
 
-    // Criteria Scores
-    let yPos = 90;
+    // Report Title (Right aligned in header)
+    doc.setFontSize(16);
+    doc.setTextColor(brandGreen);
+    doc.text("REPORTE DE ANÁLISIS AEO", 196, 22, { align: "right" });
+
+    // --- Info Section ---
+    doc.setTextColor(brandNavy);
+    doc.setFontSize(10);
+    doc.text(`URL Analizada: ${url}`, 14, 50);
+    doc.text(`Fecha del Reporte: ${new Date().toLocaleDateString()}`, 14, 56);
+
+    // --- Overall Score Circle ---
+    // Draw circle
+    doc.setDrawColor(brandGreen);
+    doc.setLineWidth(2);
+    doc.circle(170, 60, 12);
+    
+    // Score text inside circle
     doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(brandNavy);
+    doc.text(`${result.overallScore}`, 170, 62, { align: "center" });
+    
+    // Label below circle
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Puntuación General", 170, 78, { align: "center" });
+
+    // --- Executive Summary ---
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(brandNavy);
+    doc.text("Resumen Ejecutivo", 14, 70);
+    
+    // Green accent line
+    doc.setDrawColor(brandGreen);
+    doc.setLineWidth(1);
+    doc.line(14, 73, 60, 73);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(60, 60, 60);
+    const splitSummary = doc.splitTextToSize(result.summary, 130);
+    doc.text(splitSummary, 14, 80);
+
+    // --- Criteria Breakdown Table ---
+    let yPos = 110;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(brandNavy);
     doc.text("Desglose de Criterios", 14, yPos);
+    
+    // Green accent line
+    doc.setDrawColor(brandGreen);
+    doc.setLineWidth(1);
+    doc.line(14, yPos + 3, 65, yPos + 3);
+    
     yPos += 10;
     
     const criteriaRows = [
@@ -88,37 +143,91 @@ export default function Dashboard({ result, url }: DashboardProps) {
       startY: yPos,
       head: [["Criterio", "Puntuación"]],
       body: criteriaRows,
+      theme: 'grid',
+      headStyles: { fillColor: brandNavy, textColor: brandGreen, fontStyle: 'bold' },
+      styles: { textColor: brandNavy, fontSize: 10 },
+      alternateRowStyles: { fillColor: brandLight },
     });
 
-    // Recommendations
+    // --- Recommendations Table ---
     // @ts-ignore
-    yPos = doc.lastAutoTable.finalY + 15;
+    yPos = doc.lastAutoTable.finalY + 20;
+    
+    // Check for page break
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
     doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(brandNavy);
     doc.text("Recomendaciones Priorizadas", 14, yPos);
-    yPos += 5;
+    
+    // Green accent line
+    doc.setDrawColor(brandGreen);
+    doc.setLineWidth(1);
+    doc.line(14, yPos + 3, 85, yPos + 3);
+
+    yPos += 10;
 
     const recRows = result.recommendations.map(r => [r.priority, r.action, r.reason]);
     autoTable(doc, {
       startY: yPos,
       head: [["Prioridad", "Acción", "Razón"]],
       body: recRows,
+      theme: 'grid',
+      headStyles: { fillColor: brandNavy, textColor: brandGreen, fontStyle: 'bold' },
+      styles: { textColor: brandNavy, fontSize: 10 },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 25 }, // Priority column
+      },
+      alternateRowStyles: { fillColor: brandLight },
     });
 
-    // Keywords
+    // --- Keywords Table ---
     // @ts-ignore
-    yPos = doc.lastAutoTable.finalY + 15;
+    yPos = doc.lastAutoTable.finalY + 20;
+
+    // Check for page break
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
     doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(brandNavy);
     doc.text("Palabras Clave de Activación IA", 14, yPos);
-    yPos += 5;
+    
+    // Green accent line
+    doc.setDrawColor(brandGreen);
+    doc.setLineWidth(1);
+    doc.line(14, yPos + 3, 90, yPos + 3);
+
+    yPos += 10;
 
     const kwRows = result.keywords.map(k => [k.term, k.reason]);
     autoTable(doc, {
       startY: yPos,
       head: [["Palabra Clave", "Relevancia IA"]],
       body: kwRows,
+      theme: 'grid',
+      headStyles: { fillColor: brandNavy, textColor: brandGreen, fontStyle: 'bold' },
+      styles: { textColor: brandNavy, fontSize: 10 },
+      alternateRowStyles: { fillColor: brandLight },
     });
 
-    doc.save("aeo-reporte.pdf");
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(`Página ${i} de ${pageCount} - Generado por AEO R'Evolution Group`, 105, 290, { align: "center" });
+    }
+
+    doc.save("aeo-reporte-revolution.pdf");
   };
 
   return (
