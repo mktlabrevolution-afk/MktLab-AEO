@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
@@ -59,9 +59,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const h1s = $("h1").map((i, el) => $(el).text()).get();
         const h2s = $("h2").map((i, el) => $(el).text()).get().slice(0, 5);
 
-        $("script, style, nav, footer, header").remove();
-        const mainContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 15000);
-
         const schemaScripts = $('script[type="application/ld+json"]').map((i, el) => {
             try {
                 return JSON.parse($(el).html() || "{}");
@@ -73,6 +70,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const schemaString = schemaScripts.length > 0 
             ? JSON.stringify(schemaScripts, null, 2).substring(0, 5000) 
             : "No se encontró marcado Schema o hubo un error al leerlo.";
+
+        $("script, style, nav, footer, header").remove();
+        const mainContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 15000);
 
         const prompt = `
       Eres un experto Estratega de Optimización para Motores de IA (AEO). Analiza el contenido de la siguiente página web para determinar su capacidad de ser citada por motores de IA Generativa.
@@ -107,7 +107,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const result = await client.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
-            config: { responseMimeType: "application/json" },
+            config: { 
+                responseMimeType: "application/json",
+                safetySettings: [
+                  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+                  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE }
+                ],
+            },
         });
 
         const analysis = JSON.parse(result.text || "{}");

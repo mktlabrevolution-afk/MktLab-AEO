@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import dotenv from "dotenv";
@@ -63,11 +63,7 @@ app.post("/api/analyze", async (req, res) => {
       .get()
       .slice(0, 5); // Limit to first 5
     
-    // Extract main content text (naive extraction)
-    $("script, style, nav, footer, header").remove();
-    const mainContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 15000); // Limit context window
-
-    // Extract Schema Markup
+    // Extract Schema Markup BEFORE removing scripts
     const schemaScripts = $('script[type="application/ld+json"]').map((i, el) => {
       try {
           return JSON.parse($(el).html() || "{}");
@@ -75,10 +71,15 @@ app.post("/api/analyze", async (req, res) => {
           return { error: "Invalid JSON-LD" };
       }
     }).get();
+    
     // Limitar la cantidad de schemas a enviar para que no rompa el límite del prompt
     const schemaString = schemaScripts.length > 0 
         ? JSON.stringify(schemaScripts, null, 2).substring(0, 5000) 
         : "No se encontró marcado Schema o hubo un error al leerlo.";
+
+    // Extract main content text (naive extraction)
+    $("script, style, nav, footer, header").remove();
+    const mainContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 15000); // Limit context window
 
     // 3. Construct Prompt for Gemini
     const prompt = `
@@ -130,6 +131,12 @@ app.post("/api/analyze", async (req, res) => {
       contents: prompt,
       config: {
         responseMimeType: "application/json",
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE }
+        ],
       },
     });
 
