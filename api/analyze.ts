@@ -62,7 +62,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         $("script, style, nav, footer, header").remove();
         const mainContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 15000);
 
-        const schemaScripts = $('script[type="application/ld+json"]').map((i, el) => $(el).html()).get();
+        const schemaScripts = $('script[type="application/ld+json"]').map((i, el) => {
+            try {
+                return JSON.parse($(el).html() || "{}");
+            } catch (e) {
+                return { error: "Invalid JSON-LD" };
+            }
+        }).get();
+        // Limitar la cantidad de schemas a enviar para que no rompa el límite del prompt
+        const schemaString = schemaScripts.length > 0 
+            ? JSON.stringify(schemaScripts, null, 2).substring(0, 5000) 
+            : "No se encontró marcado Schema o hubo un error al leerlo.";
 
         const prompt = `
       Eres un experto Estratega de Optimización para Motores de IA (AEO). Analiza el contenido de la siguiente página web para determinar su capacidad de ser citada por motores de IA Generativa.
@@ -72,7 +82,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       Meta Descripción: ${metaDescription}
       Etiquetas H1: ${JSON.stringify(h1s)}
       Etiquetas H2: ${JSON.stringify(h2s)}
-      Marcado Schema Encontrado: ${schemaScripts.length > 0 ? "Sí" : "No"} (Cantidad: ${schemaScripts.length})
+      Marcado Schema Encontrado (${schemaScripts.length}):
+      ${schemaString}
       Muestra de Contenido: ${mainContent}
 
       Evalúa la página basándote en estos 6 criterios:
